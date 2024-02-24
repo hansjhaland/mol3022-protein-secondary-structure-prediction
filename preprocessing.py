@@ -51,14 +51,14 @@ def get_windows(sequence, window_size, one_hot_encoding):
     num_padding_symbols = window_size // 2
     for i in range(len(sequence)):
         window: list[int] = sequence[i:i+window_size]
-        for _ in num_padding_symbols:
+        for _ in range(num_padding_symbols):
             window.insert(0, one_hot_encoding["pad"])
             window.append(one_hot_encoding["pad"])
         windows.append(window)
     return windows
 
-train_data_file = "protein-secondary-structure.train"
-test_data_file = "protein-secondary-structure.test"
+train_data_file = "data/protein-secondary-structure.train"
+test_data_file = "data/protein-secondary-structure.test"
 
 # Read train and test data from files
 train_input_target_pairs = get_sequences_from_file(train_data_file)
@@ -84,4 +84,6 @@ window_size = 13
 X_train_windows = get_windows(X_train_one_hot, window_size, amino_acid_one_hot)
 
 X_test_windows = get_windows(X_test_one_hot, window_size, amino_acid_one_hot)
+
+print("done")
  
