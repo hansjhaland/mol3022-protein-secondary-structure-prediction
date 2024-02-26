@@ -1,2 +1,2 @@
-biopython # Not really
 tensorflow 
+numpy
