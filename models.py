@@ -65,19 +65,30 @@ def get_struct_struct_model_input(seq_to_struct_model, amino_acid_one_hot, secon
     
     return np.asarray(X_train_struct)
     
+def get_classifications_from_probabilities(probabilities):
+    classification_index = tf.argmax(probabilities, axis=1)
+    index_to_secondary_strucure = {"0": "h", "1": "e", "2": "_"}
     
+    classifications = []
+    for index in classification_index.numpy():
+        secondary_structure = index_to_secondary_strucure[str(index)]
+        one_hot_encoding = secondary_structure_one_hot[secondary_structure]
+        classifications.append(one_hot_encoding)
+    
+    return classifications
+
     
 if __name__ == "__main__":
     train_data_file = "data/protein-secondary-structure.train"
     test_data_file = "data/protein-secondary-structure.test" 
     
-    save_seq_model = False
+    save_seq_model = True
     save_model_path_seq = "pretrained/seq_to_struct_model.keras"
-    save_struct_model = False
+    save_struct_model = True
     save_model_path_struct = "pretrained/struct_to_struct_model.keras"
     
-    load_seq_model = True
-    load_struct_model = True
+    load_seq_model = False
+    load_struct_model = False
     
     X_train, y_train, X_test, y_test = get_data_sets_for_supervised_learning(train_data_file, test_data_file)
     
@@ -86,7 +97,8 @@ if __name__ == "__main__":
         print(f"Model loaded from {save_model_path_seq}")
     else:
         seq_to_struct_model = get_seq_to_struct_model(X_train.shape[1], y_train.shape[1])
-        seq_to_struct_model.fit(X_train, y_train, epochs=30, validation_split=0.1)
+        # seq_to_struct_model.fit(X_train, y_train, epochs=100, validation_split=0.1)
+        seq_to_struct_model.fit(X_train, y_train, epochs=100)
     
     if save_seq_model:
         seq_to_struct_model.save(save_model_path_seq)
@@ -100,12 +112,36 @@ if __name__ == "__main__":
         print(f"Model loaded from {save_model_path_struct}")
     else:
         struct_to_struct_model = get_struct_to_struct_model(X_train_struct.shape[1], y_train.shape[1])
-        struct_to_struct_model.fit(X_train_struct, y_train, epochs=30, validation_split=0.1)
+        # struct_to_struct_model.fit(X_train_struct, y_train, epochs=100, validation_split=0.1)
+        struct_to_struct_model.fit(X_train_struct, y_train, epochs=100)
 
     if save_struct_model:
         struct_to_struct_model.save(save_model_path_struct)
         print(f"Model saved to {save_model_path_struct}")
         
-    y_pred = struct_to_struct_model.predict(X_test_struct)
+    y_probabilities = struct_to_struct_model.predict(X_test_struct)
     
-    print(y_pred[0:10])
+    y_predictions = get_classifications_from_probabilities(y_probabilities)
+    
+    confusion_matrix = [[0,0,0],[0,0,0],[0,0,0]]
+    for prediction, target in zip(y_predictions, y_test):
+        target_index = np.argmax(target)
+        prediction_index = np.argmax(prediction)
+        confusion_matrix[target_index][prediction_index] += 1
+        
+    [print(row) for row in confusion_matrix]
+    
+    precision_helix = confusion_matrix[0][0] / (confusion_matrix[0][0] + confusion_matrix[1][0] + confusion_matrix[2][0])
+    precision_sheet = confusion_matrix[1][1] / (confusion_matrix[0][1] + confusion_matrix[1][1] + confusion_matrix[2][1])
+    precision_coil = confusion_matrix[2][2] / (confusion_matrix[0][2] + confusion_matrix[1][2] + confusion_matrix[2][2])
+    
+    recall_helix = confusion_matrix[0][0] / (confusion_matrix[0][0] + confusion_matrix[0][1] + confusion_matrix[0][2])
+    recall_sheet = confusion_matrix[1][1] / (confusion_matrix[1][0] + confusion_matrix[1][1] + confusion_matrix[1][2])
+    recall_coil = confusion_matrix[2][2] / (confusion_matrix[2][0] + confusion_matrix[2][1] + confusion_matrix[2][2])
+    
+    print(f"Precision helix: {precision_helix}, Recall helix: {recall_helix}")
+    print(f"Precision sheet: {precision_sheet}, Recall sheet: {recall_sheet}")
+    print(f"Precision coil: {precision_coil}, Recall c: {recall_coil}")
+    
+    
+    
