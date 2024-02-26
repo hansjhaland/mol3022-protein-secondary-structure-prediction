@@ -1,6 +1,6 @@
 from one_hot_encodings import amino_acid_one_hot, secondary_structure_one_hot
 
-def get_sequences_from_file(file_path):
+def load_sequences_from_file(file_path):
     """
     Read the file and return the amino acid sequence and secondary structure sequence.
     """
@@ -32,16 +32,18 @@ def get_sequences_from_file(file_path):
     input_target_pairs = input_target_pairs[1:]
     return input_target_pairs
 
-def get_one_hot_encoding(sequence, one_hot_encoding):
+def get_one_hot_encoding(sequence: str, one_hot_encoding: dict[str, list[int]]):
     """
     Return the one-hot encoding of the sequence.
     """
     one_hot_sequence = [one_hot_encoding[symbol] for symbol in sequence]
     return one_hot_sequence
 
-def get_windows(sequence, window_size, one_hot_encoding):
+def get_sequence_windows(sequence: list[list[int]], window_size: int, one_hot_encoding: dict[str, list[int]]):
     """
     Return the windows of the sequence.
+    
+    Each window is associated with one target value.
     
     Assumes that the symbol in the middle of the window is the "symbol of interest".
     To do this for the symbols at the start and end of the sequence, 
@@ -49,41 +51,56 @@ def get_windows(sequence, window_size, one_hot_encoding):
     """
     windows = []
     num_padding_symbols = window_size // 2
-    for i in range(len(sequence)):
-        window: list[int] = sequence[i:i+window_size]
-        for _ in range(num_padding_symbols):
-            window.insert(0, one_hot_encoding["pad"])
-            window.append(one_hot_encoding["pad"])
+    sequence_copy = sequence.copy()
+    for _ in range(num_padding_symbols):
+            sequence_copy.insert(0, one_hot_encoding["pad"])
+            sequence_copy.append(one_hot_encoding["pad"])
+    for i in range(len(sequence_copy)-window_size+1):
+        window: list[int] = sequence_copy[i:i+window_size]
+        window = [symbol for encoding in window for symbol in encoding]
         windows.append(window)
     return windows
 
 train_data_file = "data/protein-secondary-structure.train"
 test_data_file = "data/protein-secondary-structure.test"
 
+# NOTE: AA = Amino Acid
+# NOTE: SS = Secondary Structure
+
 # Read train and test data from files
-train_input_target_pairs = get_sequences_from_file(train_data_file)
-test_input_target_pairs = get_sequences_from_file(test_data_file)
+train_AA_SS_seq_pairs = load_sequences_from_file(train_data_file)
+test_AA_SS_seq_pairs = load_sequences_from_file(test_data_file)
 
 # Split into input and target sequences
-X_train = [sequence[0] for sequence in train_input_target_pairs]
-y_train = [sequence[1] for sequence in train_input_target_pairs]
+AA_seq_train = [sequence[0] for sequence in train_AA_SS_seq_pairs]
+SS_seq_train = [sequence[1] for sequence in train_AA_SS_seq_pairs]
 
-X_test = [sequence[0] for sequence in test_input_target_pairs]
-y_test = [sequence[1] for sequence in test_input_target_pairs]
+AA_seq_test = [sequence[0] for sequence in test_AA_SS_seq_pairs]
+SS_seq_test = [sequence[1] for sequence in test_AA_SS_seq_pairs]
 
 # Convert to one-hot encodings
-X_train_one_hot = [get_one_hot_encoding(sequence, amino_acid_one_hot) for sequence in X_train]
-y_train_one_hot = [get_one_hot_encoding(sequence, secondary_structure_one_hot) for sequence in y_train]
+AA_seq_train_one_hot = [get_one_hot_encoding(sequence, amino_acid_one_hot) for sequence in AA_seq_train]
+SS_seq_train_one_hot = [get_one_hot_encoding(sequence, secondary_structure_one_hot) for sequence in SS_seq_train]
 
-X_test_one_hot = [get_one_hot_encoding(sequence, amino_acid_one_hot) for sequence in X_test]
-y_test_one_hot = [get_one_hot_encoding(sequence, secondary_structure_one_hot) for sequence in y_test]
+AA_seq_test_one_hot = [get_one_hot_encoding(sequence, amino_acid_one_hot) for sequence in AA_seq_test]
+SS_seq_test_one_hot = [get_one_hot_encoding(sequence, secondary_structure_one_hot) for sequence in SS_seq_test]
     
-# Get windows
-window_size = 13
+# Convert to windows, which are the input to the neural network
+window_size = 13 # NOTE: Window size used in the slides
 
-X_train_windows = get_windows(X_train_one_hot, window_size, amino_acid_one_hot)
+train_seq_windows = [get_sequence_windows(sequence, window_size, amino_acid_one_hot) for sequence in AA_seq_train_one_hot]
+test_seq_windows = [get_sequence_windows(sequence, window_size, amino_acid_one_hot) for sequence in AA_seq_test_one_hot]
 
-X_test_windows = get_windows(X_test_one_hot, window_size, amino_acid_one_hot)
+X_train = [window for sequence in train_seq_windows for window in sequence]
+y_train = [label for sequence in SS_seq_train_one_hot for label in sequence]
 
-print("done")
+X_test = [window for sequence in test_seq_windows for window in sequence]
+y_test = [label for sequence in SS_seq_test_one_hot for label in sequence]
+
+print(len(X_train), len(y_train))
+
+total_amino_acids = sum([len(sequence) for sequence in AA_seq_train_one_hot])
+total_secondary_structures = sum([len(sequence) for sequence in SS_seq_train_one_hot])
+print(total_amino_acids, total_secondary_structures)
+
  
