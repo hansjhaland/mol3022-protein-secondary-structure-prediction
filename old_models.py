@@ -51,7 +51,7 @@ def get_struct_to_struct_model(input_length, num_classes) -> tf.keras.models.Seq
 def get_struct_struct_model_input(seq_to_struct_model, amino_acid_one_hot, secondary_structure_one_hot, train_data_file) -> np.ndarray:
     sequence_pairs = load_sequences_from_file(train_data_file)
     AA_seq = [sequence[0] for sequence in sequence_pairs]
-    AA_seq_one_hots = [get_one_hot_encoding(sequence, amino_acid_one_hot) for sequence in AA_seq]
+    AA_seq_one_hots = [get_one_hot_encoding_of_sequence(sequence, amino_acid_one_hot) for sequence in AA_seq]
     
     struct_windows = []
     for aa_seq_encoding in AA_seq_one_hots:
