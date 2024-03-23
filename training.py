@@ -76,12 +76,6 @@ def train_feedforward_structure_to_structure_model(inputs, targets, learning_rat
     return model
 
 
-def load_trained_model(load_file_path):
-    # Filename based on type
-    model = torch.load(load_file_path)
-    model.eval()
-    return model
-
 
 def save_trained_model(model, save_file_path):
     torch.save(model, save_file_path)
