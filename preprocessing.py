@@ -65,14 +65,12 @@ def get_sequence_windows(sequence: list[list[int]], window_size: int, one_hot_en
     return windows
 
 
-def get_data_sets_for_supervised_learning(train_data_file: str, test_data_file: str, window_size=13) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    # TODO: This function may be more specific to the feedforward strategy, not supervised learning in general. 
-    # May need to rename this and create similar funcitons for other architectures. 
+def get_feedforward_amino_to_structure_data_sets(train_data_file: str, test_data_file: str, window_size=13) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     
     """
-    Returns train and test datasets, containing pairs of sequence windows and target values.
-    These data sets may be used as input and targets for a feedforward neural network model. 
-
+    Returns train and test datasets, containing pairs of amino acid sequence windows and target values.
+    These data sets may be used as input and targets for a feedforward amino-to-structure model. 
+    
     NOTE: AA = Amino Acid
     NOTE: SS = Secondary Structure
     
@@ -111,14 +109,51 @@ def get_data_sets_for_supervised_learning(train_data_file: str, test_data_file: 
     return np.asarray(X_train), np.asarray(y_train), np.asarray(X_test), np.asarray(y_test)
 
 
+def get_feedforward_structure_to_structure_data_sets(train_data_file: str, test_data_file: str, window_size = 13) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Returns train and test datasets, containing pairs of secondary structure sequence windows and target values.
+    These data sets may be used as input and targets for a feedforward structure-to-structure model.
+    
+    NOTE: These inputs should only be used when training the model. 
+    When doing inference, the inputs needs to be converted from the amino-to-structure outputs. 
+    
+    NOTE: SS = Secondary Structure
+
+    """
+    train_sequence_pairs = load_sequences_from_file(train_data_file)
+    test_sequence_pairs = load_sequences_from_file(test_data_file)
+    
+    SS_seq_train = [sequence[1] for sequence in train_sequence_pairs]
+    SS_seq_test = [sequence[1] for sequence in test_sequence_pairs]
+    
+    SS_seq_train_one_hot = [get_one_hot_encoding_of_sequence(sequence, secondary_structure_one_hot) for sequence in SS_seq_train]
+    SS_seq_test_one_hot = [get_one_hot_encoding_of_sequence(sequence, secondary_structure_one_hot) for sequence in SS_seq_test]
+    
+    train_seq_windows = [get_sequence_windows(sequence, window_size, secondary_structure_one_hot) for sequence in SS_seq_train_one_hot]
+    test_seq_windows = [get_sequence_windows(sequence, window_size, secondary_structure_one_hot) for sequence in SS_seq_test_one_hot]
+    
+    X_train = [window for sequence in train_seq_windows for window in sequence]
+    y_train = [label for sequence in SS_seq_train_one_hot for label in sequence]
+    
+    X_test = [window for sequence in test_seq_windows for window in sequence]
+    y_test = [label for sequence in SS_seq_test_one_hot for label in sequence]
+    
+    return np.asarray(X_train), np.asarray(y_train), np.asarray(X_test), np.asarray(y_test)
+    
+
 if __name__ == "__main__":
     
     train_data_file = "data/protein-secondary-structure.train"
     test_data_file = "data/protein-secondary-structure.test"  
     
-    X_train, y_train, X_test, y_test = get_data_sets_for_supervised_learning(train_data_file, test_data_file)
+    X_train, y_train, X_test, y_test = get_feedforward_amino_to_structure_data_sets(train_data_file, test_data_file)
+    SS_X_train, SS_y_train, SS_X_test, SS_y_test = get_feedforward_structure_to_structure_data_sets(train_data_file, test_data_file)
     
+    print("Amino to Structure shapes:")
     print(X_train.shape, y_train.shape)
     print(X_test.shape, y_test.shape)
-
+    print()
+    print("Structure to Structure shapes:")
+    print(SS_X_train.shape, SS_y_train.shape)
+    print(SS_X_test.shape, SS_y_test.shape)
  

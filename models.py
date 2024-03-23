@@ -1,12 +1,16 @@
 import torch
 from torch import nn
-import preprocessing as pp
 
 torch.manual_seed(42)
 
 class FeedforwardAminoToStructure(nn.Module):
+    """
+    Input: Window of one-encoded protein subsequence.
+    Output: [p_helix, p_sheet, p_coil]
+     
+    """
     def __init__(self, input_size: int, num_classes: int):
-        super().__init__(self)
+        super().__init__()
         self.input = nn.Linear(input_size, 128)
         self.hidden1 = nn.Linear(128, 64)
         self.hidden2 = nn.Linear(64, 64)
@@ -16,7 +20,7 @@ class FeedforwardAminoToStructure(nn.Module):
         self.do2 = nn.Dropout(0.2)
         self.do3 = nn.Dropout(0.2)
         
-        self.softmax = nn.Softmax(num_classes)
+        self.softmax = nn.Softmax()
         self.relu = nn.ReLU()
         
     def forward(self, x):
@@ -32,8 +36,14 @@ class FeedforwardAminoToStructure(nn.Module):
 
 
 class FeedforwardStructureToStructure(nn.Module):
+    """
+    Input: Window of secondary structure classification probabilities.
+    Output: [p_helix, p_sheet, p_coil]
+    
+    """
+    
     def __init__(self, input_size: int, num_classes: int):
-        super().__init__(self)
+        super().__init__()
         self.input = nn.Linear(input_size, 128)
         self.hidden1 = nn.Linear(128, 64)
         self.hidden2 = nn.Linear(64, 64)
@@ -43,7 +53,7 @@ class FeedforwardStructureToStructure(nn.Module):
         self.do2 = nn.Dropout(0.2)
         self.do3 = nn.Dropout(0.2)
         
-        self.softmax = nn.Softmax(num_classes)
+        self.softmax = nn.Softmax()
         self.relu = nn.ReLU()
         
     def forward(self, x):
