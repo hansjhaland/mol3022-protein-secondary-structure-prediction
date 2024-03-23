@@ -1,9 +1,9 @@
 import numpy as np
 from one_hot_encodings import amino_acid_one_hot, secondary_structure_one_hot
 
-def load_sequences_from_file(file_path):
+def load_sequences_from_file(file_path: str) -> list[tuple[str, str]]:
     """
-    Read the file and return the amino acid sequence and secondary structure sequence.
+    Read the file and return a list of amino acid and secondary structure sequence pairs.
     """
     # Open the file and read lines
     with open(file_path, "r") as f:
@@ -33,16 +33,18 @@ def load_sequences_from_file(file_path):
     input_target_pairs = input_target_pairs[1:]
     return input_target_pairs
 
-def get_one_hot_encoding(sequence: str, one_hot_encoding: dict[str, list[int]]):
+def get_one_hot_encoding_of_sequence(sequence: str, one_hot_encoding: dict[str, list[int]]) -> list[list[int]]:
     """
-    Return the one-hot encoding of the sequence.
+    Return the one-hot encoding of a given sequence.
     """
     one_hot_sequence = [one_hot_encoding[symbol] for symbol in sequence]
     return one_hot_sequence
 
-def get_sequence_windows(sequence: list[list[int]], window_size: int, one_hot_encoding: dict[str, list[int]]):
+def get_sequence_windows(sequence: list[list[int]], window_size: int, one_hot_encoding: dict[str, list[int]]) -> list[list[list[int]]]:
     """
-    Return the windows of the sequence.
+    Return all windows  with the given window size for a given sequence.
+    
+    The sequence is assumed to be one-hot encoded.
     
     Each window is associated with one target value.
     
@@ -63,9 +65,19 @@ def get_sequence_windows(sequence: list[list[int]], window_size: int, one_hot_en
     return windows
 
 
-def get_data_sets_for_supervised_learning(train_data_file: str, test_data_file: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    # NOTE: AA = Amino Acid
-    # NOTE: SS = Secondary Structure
+def get_data_sets_for_supervised_learning(train_data_file: str, test_data_file: str, window_size=13) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    # TODO: This function may be more specific to the feedforward strategy, not supervised learning in general. 
+    # May need to rename this and create similar funcitons for other architectures. 
+    
+    """
+    Returns train and test datasets, containing pairs of sequence windows and target values.
+    These data sets may be used as input and targets for a feedforward neural network model. 
+
+    NOTE: AA = Amino Acid
+    NOTE: SS = Secondary Structure
+    
+    NOTE: Window size 13 is used in the lecture slides
+    """
 
     # Read train and test data from files
     train_AA_SS_seq_pairs = load_sequences_from_file(train_data_file)
@@ -79,18 +91,17 @@ def get_data_sets_for_supervised_learning(train_data_file: str, test_data_file: 
     SS_seq_test = [sequence[1] for sequence in test_AA_SS_seq_pairs]
 
     # Convert to one-hot encodings
-    AA_seq_train_one_hot = [get_one_hot_encoding(sequence, amino_acid_one_hot) for sequence in AA_seq_train]
-    SS_seq_train_one_hot = [get_one_hot_encoding(sequence, secondary_structure_one_hot) for sequence in SS_seq_train]
+    AA_seq_train_one_hot = [get_one_hot_encoding_of_sequence(sequence, amino_acid_one_hot) for sequence in AA_seq_train]
+    SS_seq_train_one_hot = [get_one_hot_encoding_of_sequence(sequence, secondary_structure_one_hot) for sequence in SS_seq_train]
 
-    AA_seq_test_one_hot = [get_one_hot_encoding(sequence, amino_acid_one_hot) for sequence in AA_seq_test]
-    SS_seq_test_one_hot = [get_one_hot_encoding(sequence, secondary_structure_one_hot) for sequence in SS_seq_test]
+    AA_seq_test_one_hot = [get_one_hot_encoding_of_sequence(sequence, amino_acid_one_hot) for sequence in AA_seq_test]
+    SS_seq_test_one_hot = [get_one_hot_encoding_of_sequence(sequence, secondary_structure_one_hot) for sequence in SS_seq_test]
         
     # Convert to windows, which are the input to the neural network
-    window_size = 13 # NOTE: Window size used in the slides
-
     train_seq_windows = [get_sequence_windows(sequence, window_size, amino_acid_one_hot) for sequence in AA_seq_train_one_hot]
     test_seq_windows = [get_sequence_windows(sequence, window_size, amino_acid_one_hot) for sequence in AA_seq_test_one_hot]
 
+    # Number of windows is equal to number of labels
     X_train = [window for sequence in train_seq_windows for window in sequence]
     y_train = [label for sequence in SS_seq_train_one_hot for label in sequence]
 
