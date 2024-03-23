@@ -59,7 +59,7 @@ def train_feedforward_structure_to_structure_model(inputs, targets, learning_rat
     input_size = inputs.shape[1]
     num_classes = targets.shape[1]
     
-    model = FeedforwardAminoToStructure(input_size=input_size, num_classes=num_classes)
+    model = FeedforwardStructureToStructure(input_size=input_size, num_classes=num_classes)
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.Adam(params=model.parameters(), lr=learning_rate)
     
@@ -76,9 +76,11 @@ def train_feedforward_structure_to_structure_model(inputs, targets, learning_rat
     return model
 
 
-def load_trained_model(type: str):
+def load_trained_model(load_file_path):
     # Filename based on type
-    pass
+    model = torch.load(load_file_path)
+    model.eval()
+    return model
 
 
 def save_trained_model(model, save_file_path):
