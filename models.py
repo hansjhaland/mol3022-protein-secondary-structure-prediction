@@ -66,3 +66,27 @@ class FeedforwardStructureToStructure(nn.Module):
         x = self.relu(self.output(x))
         x = self.softmax(x)
         return x
+    
+    
+class LSTM(nn.Module):
+    
+    def __init__(self, input_size: int, num_classes: int, hidden_size:int):
+        super().__init__()
+        
+        self.lstm = nn.LSTM(input_size, hidden_size)
+        
+        self.hidden1 = nn.Linear(hidden_size, 32)
+        self.output = nn.Linear(32, num_classes)
+        
+        self.relu = nn.ReLU()
+        self.tanh = nn.Tanh()
+        self.softmax = nn.Softmax()
+        
+    def forward(self, x):
+        x, _ = self.lstm(x)
+        x = self.tanh(x)
+        x = self.relu(self.hidden1(x))
+        x = self.output(x)
+        x = self.softmax(x)
+        return x
+    
