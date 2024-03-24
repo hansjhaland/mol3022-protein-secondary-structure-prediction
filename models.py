@@ -88,5 +88,5 @@ class LSTM(nn.Module):
         x = self.relu(self.hidden1(x))
         x = self.output(x)
         x = self.softmax(x)
-        return x
+        return x[:, -1]
     
