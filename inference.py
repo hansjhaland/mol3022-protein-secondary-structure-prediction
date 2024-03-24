@@ -71,21 +71,36 @@ def load_trained_model(load_file_path):
 
 if __name__ == "__main__":
     import training as train
+    import evaluation as eval
+    
     
     train_data_file = "data/protein-secondary-structure.train"
     test_data_file = "data/protein-secondary-structure.test"     
     
+    load_file_path_amino = "pretrained/feedforward_amino_to_structure.pt"  
+    load_file_path_structure = "pretrained/feedforward_structure_to_structure.pt"
+    
+    load_model = True
+    
     X_train_a_to_s, y_train_a_to_s, X_test_a_to_s, y_test_a_to_s = pp.get_feedforward_amino_to_structure_data_sets(train_data_file, test_data_file)
     X_train_s_to_s, y_train_s_to_s, X_test_s_to_s, y_test_s_to_s = pp.get_feedforward_structure_to_structure_data_sets(train_data_file, test_data_file)
     
-    amino_to_structure_model = train.train_feedforward_amino_to_structure_model(X_train_a_to_s, y_train_a_to_s)
-    structure_to_structure_model = train.train_feedforward_structure_to_structure_model(X_train_s_to_s, y_train_s_to_s)
-    
+    if load_model:
+        amino_to_structure_model = load_trained_model(load_file_path_amino)
+        structure_to_structure_model = load_trained_model(load_file_path_structure)
+    else:
+        amino_to_structure_model = train.train_feedforward_amino_to_structure_model(X_train_a_to_s, y_train_a_to_s, num_epochs=1000)
+        structure_to_structure_model = train.train_feedforward_structure_to_structure_model(X_train_s_to_s, y_train_s_to_s, num_epochs=1000)
+        
     predicted_probabilites = get_full_feedforward_predictions(amino_to_structure_model, structure_to_structure_model, X_test_a_to_s)
     
     print(predicted_probabilites.shape)
     
     predicted_one_hots, predicted_symbold, confidences = get_classification_from_probabilities(predicted_probabilites)
     
-    print(confidences)
+    confusion_matrix = eval.get_confusion_matrix(predicted_one_hots, y_test_s_to_s)
+    
+    print(confusion_matrix)
+    
+    [print(f"Sensitivity: {sens}, Specificity {spec}") for (sens, spec) in eval.get_sensitivity_and_specificity_from_confusion_matrix(confusion_matrix)]
     
