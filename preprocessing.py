@@ -186,6 +186,14 @@ def get_lstm_data_set(train_data_file: str, test_data_file: str, window_size = 1
     
     return np.asarray(X_train), np.asarray(y_train), np.asarray(X_test), np.asarray(y_test)
     
+    
+def get_CNN_2D_data_set(train_data_file: str, test_data_file: str, window_size = 13):
+    X_train, y_train, X_test, y_test = get_lstm_data_set(train_data_file, test_data_file, window_size)
+    
+    X_train = [np.transpose(window) for window in X_train]
+    X_test = [np.transpose(window) for window in X_test]
+    
+    return np.asarray(X_train), np.asarray(y_train), np.asarray(X_test), np.asarray(y_test)
         
 
 if __name__ == "__main__":
@@ -195,7 +203,9 @@ if __name__ == "__main__":
     
     X_train, y_train, X_test, y_test = get_feedforward_amino_to_structure_data_sets(train_data_file, test_data_file, window_size=13)
     SS_X_train, SS_y_train, SS_X_test, SS_y_test = get_feedforward_structure_to_structure_data_sets(train_data_file, test_data_file, window_size=13)
-    LSTM_X_train, LSTM_y_train, LSTM_X_test, LSTM_y_test = get_lstm_data_set(train_data_file, test_data_file, window_size=25)
+    LSTM_X_train, LSTM_y_train, LSTM_X_test, LSTM_y_test = get_lstm_data_set(train_data_file, test_data_file, window_size=13)
+    CNN_2D_X_train, CNN_2D_y_train, CNN_2D_X_test, CNN_2D_y_test = get_CNN_2D_data_set(train_data_file, test_data_file, window_size=13)
+    
     
     print("Amino to Structure shapes:")
     print(X_train.shape, y_train.shape)
@@ -207,5 +217,11 @@ if __name__ == "__main__":
     print()
     print("LSTM shapes:")
     print(LSTM_X_train.shape, LSTM_y_train.shape)
-    print(LSTM_X_test.shape, LSTM_y_test.shape)    
+    print(LSTM_X_test.shape, LSTM_y_test.shape)
+    # print(LSTM_X_train[0])    
+    print()
+    print("CNN 2D shapes")
+    print(CNN_2D_X_train.shape, CNN_2D_y_train.shape)
+    print(CNN_2D_X_test.shape, CNN_2D_y_test.shape)
+    print(CNN_2D_X_train[0])
     
