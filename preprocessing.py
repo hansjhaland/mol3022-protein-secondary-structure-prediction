@@ -66,6 +66,8 @@ def get_sequence_windows(sequence: list[list[int]], window_size: int, one_hot_en
 
 
 def get_lstm_sequence_windows(sequence, window_size, one_hot_encoding):
+    # NOTE: Only works propersly when window_size is an ODD number.
+    # For even window size, additional windows are added.
     windows = []
     num_padding_symbols = window_size // 2
     sequence_copy = sequence.copy()
@@ -111,7 +113,7 @@ def get_feedforward_amino_to_structure_data_sets(train_data_file: str, test_data
     # Convert to windows, which are the input to the neural network
     train_seq_windows = [get_sequence_windows(sequence, window_size, amino_acid_one_hot) for sequence in AA_seq_train_one_hot]
     test_seq_windows = [get_sequence_windows(sequence, window_size, amino_acid_one_hot) for sequence in AA_seq_test_one_hot]
-
+    
     # Number of windows is equal to number of labels
     X_train = [window for sequence in train_seq_windows for window in sequence]
     y_train = [label for sequence in SS_seq_train_one_hot for label in sequence]
@@ -175,6 +177,7 @@ def get_lstm_data_set(train_data_file: str, test_data_file: str, window_size = 1
     train_seq_windows = [get_lstm_sequence_windows(sequence, window_size, amino_acid_one_hot) for sequence in AA_seq_train_one_hot]
     test_seq_windows = [get_lstm_sequence_windows(sequence, window_size, amino_acid_one_hot) for sequence in AA_seq_test_one_hot]
     
+    
     X_train = [window for sequence in train_seq_windows for window in sequence]
     y_train = [label for sequence in SS_seq_train_one_hot for label in sequence]
 
@@ -190,9 +193,9 @@ if __name__ == "__main__":
     train_data_file = "data/protein-secondary-structure.train"
     test_data_file = "data/protein-secondary-structure.test"  
     
-    X_train, y_train, X_test, y_test = get_feedforward_amino_to_structure_data_sets(train_data_file, test_data_file)
-    SS_X_train, SS_y_train, SS_X_test, SS_y_test = get_feedforward_structure_to_structure_data_sets(train_data_file, test_data_file)
-    LSTM_X_train, LSTM_y_train, LSTM_X_test, LSTM_y_test = get_lstm_data_set(train_data_file, test_data_file)
+    X_train, y_train, X_test, y_test = get_feedforward_amino_to_structure_data_sets(train_data_file, test_data_file, window_size=13)
+    SS_X_train, SS_y_train, SS_X_test, SS_y_test = get_feedforward_structure_to_structure_data_sets(train_data_file, test_data_file, window_size=13)
+    LSTM_X_train, LSTM_y_train, LSTM_X_test, LSTM_y_test = get_lstm_data_set(train_data_file, test_data_file, window_size=25)
     
     print("Amino to Structure shapes:")
     print(X_train.shape, y_train.shape)
@@ -204,7 +207,5 @@ if __name__ == "__main__":
     print()
     print("LSTM shapes:")
     print(LSTM_X_train.shape, LSTM_y_train.shape)
-    print(LSTM_X_test.shape, LSTM_y_test.shape)
-    
-    
+    print(LSTM_X_test.shape, LSTM_y_test.shape)    
     
