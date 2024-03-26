@@ -13,7 +13,7 @@ def get_feedforward_amino_to_structure_predictions(model, inputs):
         for input in inputs:
             prediction = model(input)
             predictions.append(prediction.numpy())
-    return np.asarray(predictions)
+    return np.asarray(predictions).squeeze()
 
 
 def get_feedforward_structure_to_structure_predictions(model, inputs):
@@ -29,19 +29,28 @@ def get_feedforward_structure_to_structure_predictions(model, inputs):
     return np.asarray(predictions).squeeze(0)
 
 
-def get_structure_to_structure_input_from_amino_to_structure_output(amino_to_structure_model, secondary_structure_one_hot, amino_windows, window_size=13):
+def get_next_full_amino_sequence(amino_windows, amino_sequence_length):
+    amino_sequence = []
+    for i in range(amino_sequence_length):
+        amino_sequence.append(amino_windows[i])
+    remaining_windows = amino_windows[amino_sequence_length:]
+    return amino_sequence, remaining_windows
+
+
+def get_structure_to_structure_input_from_amino_to_structure_output(amino_to_structure_model, secondary_structure_one_hot, amino_windows, amino_sequence_lengths, window_size=13, window_type="concatenate"):
     structure_windows = []
-    for amino_window in amino_windows:
-        structure_predictions = get_feedforward_amino_to_structure_predictions(amino_to_structure_model, amino_window)
-        structure_window = pp.get_sequence_windows(structure_predictions.tolist(), window_size, secondary_structure_one_hot)
-        structure_windows.append(structure_window)
+    for sequence_length in amino_sequence_lengths:
+        amino_sequence, amino_windows = get_next_full_amino_sequence(amino_windows, sequence_length)
     
-    structure_to_structure_input = [window for sequence in structure_windows for window in sequence]
-    return np.asarray(structure_to_structure_input)
+        predicted_structure_sequence = get_feedforward_amino_to_structure_predictions(amino_to_structure_model, amino_sequence)
+        structure_sequence_windows = pp.get_concat_sequence_windows(predicted_structure_sequence.tolist(), window_size, secondary_structure_one_hot)
+        structure_windows = [*structure_windows, *structure_sequence_windows]
+
+    return np.asarray(structure_windows)
             
 
-def get_full_feedforward_predictions(amino_to_structure_model, structure_to_structure_model, amino_windows) -> list[list[float]]:
-    structure_to_structure_inputs = get_structure_to_structure_input_from_amino_to_structure_output(amino_to_structure_model, secondary_structure_one_hot, amino_windows, window_size=13)
+def get_full_feedforward_predictions(amino_to_structure_model, structure_to_structure_model, amino_windows, amino_sequence_lengths, window_type="concatenate") -> list[list[float]]:
+    structure_to_structure_inputs = get_structure_to_structure_input_from_amino_to_structure_output(amino_to_structure_model, secondary_structure_one_hot, amino_windows, amino_sequence_lengths, window_size=13, window_type=window_type)
     feedforward_predictions = get_feedforward_structure_to_structure_predictions(structure_to_structure_model, structure_to_structure_inputs)
     return feedforward_predictions
     
@@ -55,6 +64,19 @@ def get_cnn_2d_predictions(cnn_2d_model, inputs):
         predictions = []
         for input in inputs:
             prediction = cnn_2d_model(input.unsqueeze(0))
+            predictions.append(prediction.numpy())
+    return np.asarray(predictions)
+
+
+def get_cnn_1d_predictions(cnn_1d_model, inputs):
+    inputs = torch.Tensor(inputs)
+    inputs = inputs.unsqueeze(1)
+    
+    cnn_1d_model.eval()
+    with torch.no_grad():
+        predictions = []
+        for input in inputs:
+            prediction = cnn_1d_model(input.unsqueeze(0))
             predictions.append(prediction.numpy())
     return np.asarray(predictions)
     
@@ -95,34 +117,48 @@ if __name__ == "__main__":
     load_file_path_amino = "pretrained/feedforward_amino_to_structure.pt"  
     load_file_path_structure = "pretrained/feedforward_structure_to_structure.pt"
     load_file_cnn_2d = "pretrained/cnn_2d.pt"
+    load_file_cnn_1d = "pretrained/cnn_1d.pt"
     
     load_model = True
     
     # Feedfoward
-    X_train_a_to_s, y_train_a_to_s, X_test_a_to_s, y_test_a_to_s = pp.get_feedforward_amino_to_structure_data_sets(train_data_file, test_data_file)
-    X_train_s_to_s, y_train_s_to_s, X_test_s_to_s, y_test_s_to_s = pp.get_feedforward_structure_to_structure_data_sets(train_data_file, test_data_file)
+    X_train_a_to_s, y_train_a_to_s, X_test_a_to_s, y_test_a_to_s, sequence_lengts_train, sequence_lengths_test = pp.get_feedforward_amino_to_structure_data_sets(train_data_file, test_data_file)
+    X_train_s_to_s, y_train_s_to_s, X_test_s_to_s, y_test_s_to_s = pp.get_feedforward_structure_to_structure_data_sets(train_data_file, test_data_file)    
     
     # CNN
     X_train_CNN_2d, y_train_CNN_2d, X_test_CNN_2d, y_test_CNN_2d = pp.get_CNN_2D_data_set(train_data_file, test_data_file)
+    
     
     if load_model:
         amino_to_structure_model = load_trained_model(load_file_path_amino)
         structure_to_structure_model = load_trained_model(load_file_path_structure)
         cnn_2d_model = load_trained_model(load_file_cnn_2d)
+        cnn_1d_model = load_trained_model(load_file_cnn_1d)
     else:
         amino_to_structure_model = train.train_feedforward_amino_to_structure_model(X_train_a_to_s, y_train_a_to_s, num_epochs=1000)
         structure_to_structure_model = train.train_feedforward_structure_to_structure_model(X_train_s_to_s, y_train_s_to_s, num_epochs=1000)
         
-    feedforward_predicted_probabilities = get_full_feedforward_predictions(amino_to_structure_model, structure_to_structure_model, X_test_a_to_s)
+    feedforward_predicted_probabilities = get_full_feedforward_predictions(amino_to_structure_model, structure_to_structure_model, X_test_a_to_s, sequence_lengths_test)
     cnn_predicted_probabilities = get_cnn_2d_predictions(cnn_2d_model, X_test_CNN_2d)
+    cnn_1d_predicted_probabilities = get_cnn_1d_predictions(cnn_1d_model, X_test_a_to_s)
     
+    print("Feedforward model")
     feedforward_predicted_one_hots, feedforward_predicted_symbold, feedforward_confidences = get_classification_from_probabilities(feedforward_predicted_probabilities, model_type="ff")
     feedforward_confusion_matrix = eval.get_confusion_matrix(feedforward_predicted_one_hots, y_test_s_to_s)
     [print(row) for row in feedforward_confusion_matrix]
     [print(f"Sensitivity: {sens}, Specificity {spec}") for (sens, spec) in eval.get_sensitivity_and_specificity_from_confusion_matrix(feedforward_confusion_matrix)]
+    print()
     
+    print("2D CNN")
     cnn_predicted_one_hots, cnn_predicted_symbold, cnn_confidences = get_classification_from_probabilities(cnn_predicted_probabilities, model_type="cnn")
     cnn_confusion_matrix = eval.get_confusion_matrix(cnn_predicted_one_hots, y_test_s_to_s)
     [print(row) for row in cnn_confusion_matrix]
     [print(f"Sensitivity: {sens}, Specificity {spec}") for (sens, spec) in eval.get_sensitivity_and_specificity_from_confusion_matrix(cnn_confusion_matrix)]
+    print()
     
+    print("1D CNN")
+    cnn_1d_predicted_one_hots, cnn_1d_predicted_symbold, cnn_1d_confidences = get_classification_from_probabilities(cnn_1d_predicted_probabilities, model_type="cnn")
+    cnn_1d_confusion_matrix = eval.get_confusion_matrix(cnn_1d_predicted_one_hots, y_test_s_to_s)
+    [print(row) for row in cnn_1d_confusion_matrix]
+    [print(f"Sensitivity: {sens}, Specificity {spec}") for (sens, spec) in eval.get_sensitivity_and_specificity_from_confusion_matrix(cnn_1d_confusion_matrix)]
+        
