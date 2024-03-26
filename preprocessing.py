@@ -222,3 +222,10 @@ if __name__ == "__main__":
     print("CNN 2D shapes")
     print(CNN_2D_X_train.shape, CNN_2D_y_train.shape)
     print(CNN_2D_X_test.shape, CNN_2D_y_test.shape)
+
+
+    print_sequences = False
+    if print_sequences:
+        test_file_sequence_pairs = load_sequences_from_file(test_data_file)
+
+        [print("Input:", pair[0], "\n", "Target:", pair[1], "\n") for pair in test_file_sequence_pairs[:10]]
