@@ -42,7 +42,7 @@ from one_hot_encodings import amino_acid_one_hot
 import numpy as np
 
 def main():
-    input_sequence: str = input("Sequence of amino acids: ").upper()
+    input_sequence: str = input("Enter sequence of amino acids: ").upper()
     
     print("Predicting secondary structure sequence...\n")
     
@@ -68,7 +68,7 @@ def main():
     cnn_2d_model = infer.load_trained_model(file_path_2d_cnn)
     cnn_1d_model = infer.load_trained_model(file_path_1d_cnn)
     
-    one_hots, symbols = infer.get_ensemble_predictions(two_stage_feedforward_model,
+    _, symbols = infer.get_ensemble_predictions(two_stage_feedforward_model,
                                                        cnn_2d_model,
                                                        cnn_1d_model, 
                                                        model_input_1d,
@@ -80,10 +80,10 @@ def main():
     print("Predicted secondary structure sequence is:")
     print(predicted_secondary_structure_sequence + "\n")
     
-    compare: str = input("Want to compare with true secondary structure sequence? (y/n): ").lower()
+    compare: str = input("Compare result with true secondary structure sequence? (y/n): ").lower()
     
     if compare == "y":
-        true_secondary_structure_sequence = input("Provide true sequence").lower()
+        true_secondary_structure_sequence = input("Enter true sequence: ").lower()
         
         compare_string = []
         miss_count = 0
@@ -100,12 +100,14 @@ def main():
         compare_string = "".join(compare_string)
         
         print(f"Missed {miss_count} out of {sequence_length} symbols.")
-        print("Position of misses marked by 'X':")
+        print("Showing sequences in order: misses, true, predicted. Position of misses marked by 'X':")
         print(compare_string)
+        print()
         print(true_secondary_structure_sequence)  
+        print()
+        print(predicted_secondary_structure_sequence)
+        print()
             
-    
-
 
 if __name__ == "__main__":
     main()
