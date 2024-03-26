@@ -82,7 +82,7 @@ def get_sequential_sequence_windows(sequence, window_size, one_hot_encoding):
     return windows
 
 
-def get_feedforward_amino_to_structure_data_sets(train_data_file: str, test_data_file: str, window_size=13, window_type="concatenate") -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def get_feedforward_amino_to_structure_data_sets(train_data_file: str, test_data_file: str, window_size=13) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     
     """
     Returns train and test datasets, containing pairs of amino acid sequence windows and target values.
@@ -116,9 +116,8 @@ def get_feedforward_amino_to_structure_data_sets(train_data_file: str, test_data
     SS_seq_test_one_hot = [get_one_hot_encoding_of_sequence(sequence, secondary_structure_one_hot) for sequence in SS_seq_test]
         
     # Convert to windows, which are the input to the neural network
-    if window_type == "concatenate":
-        train_seq_windows = [get_concat_sequence_windows(sequence, window_size, amino_acid_one_hot) for sequence in AA_seq_train_one_hot]
-        test_seq_windows = [get_concat_sequence_windows(sequence, window_size, amino_acid_one_hot) for sequence in AA_seq_test_one_hot]
+    train_seq_windows = [get_concat_sequence_windows(sequence, window_size, amino_acid_one_hot) for sequence in AA_seq_train_one_hot]
+    test_seq_windows = [get_concat_sequence_windows(sequence, window_size, amino_acid_one_hot) for sequence in AA_seq_test_one_hot]
 
     # Number of windows is equal to number of labels
     X_train = [window for sequence in train_seq_windows for window in sequence]
@@ -130,7 +129,7 @@ def get_feedforward_amino_to_structure_data_sets(train_data_file: str, test_data
     return np.asarray(X_train), np.asarray(y_train), np.asarray(X_test), np.asarray(y_test), np.asarray(sequence_lengths_train), np.asarray(sequence_lengths_test)
 
 
-def get_feedforward_structure_to_structure_data_sets(train_data_file: str, test_data_file: str, window_size = 13, window_type="concatenate") -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def get_feedforward_structure_to_structure_data_sets(train_data_file: str, test_data_file: str, window_size = 13) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Returns train and test datasets, containing pairs of secondary structure sequence windows and target values.
     These data sets may be used as input and targets for a feedforward structure-to-structure model.
@@ -150,9 +149,8 @@ def get_feedforward_structure_to_structure_data_sets(train_data_file: str, test_
     SS_seq_train_one_hot = [get_one_hot_encoding_of_sequence(sequence, secondary_structure_one_hot) for sequence in SS_seq_train]
     SS_seq_test_one_hot = [get_one_hot_encoding_of_sequence(sequence, secondary_structure_one_hot) for sequence in SS_seq_test]
     
-    if window_type == "concatenate":
-        train_seq_windows = [get_concat_sequence_windows(sequence, window_size, secondary_structure_one_hot) for sequence in SS_seq_train_one_hot]
-        test_seq_windows = [get_concat_sequence_windows(sequence, window_size, secondary_structure_one_hot) for sequence in SS_seq_test_one_hot]
+    train_seq_windows = [get_concat_sequence_windows(sequence, window_size, secondary_structure_one_hot) for sequence in SS_seq_train_one_hot]
+    test_seq_windows = [get_concat_sequence_windows(sequence, window_size, secondary_structure_one_hot) for sequence in SS_seq_test_one_hot]
     
     X_train = [window for sequence in train_seq_windows for window in sequence]
     y_train = [label for sequence in SS_seq_train_one_hot for label in sequence]
@@ -208,8 +206,8 @@ if __name__ == "__main__":
     train_data_file = "data/protein-secondary-structure.train"
     test_data_file = "data/protein-secondary-structure.test"  
     
-    X_train, y_train, X_test, y_test, sequence_lengths_train, sequence_lengths_test = get_feedforward_amino_to_structure_data_sets(train_data_file, test_data_file, window_size=13, window_type="concatenate")
-    SS_X_train, SS_y_train, SS_X_test, SS_y_test = get_feedforward_structure_to_structure_data_sets(train_data_file, test_data_file, window_size=13, window_type="concatenate")
+    X_train, y_train, X_test, y_test, sequence_lengths_train, sequence_lengths_test = get_feedforward_amino_to_structure_data_sets(train_data_file, test_data_file, window_size=13)
+    SS_X_train, SS_y_train, SS_X_test, SS_y_test = get_feedforward_structure_to_structure_data_sets(train_data_file, test_data_file, window_size=13)
     CNN_2D_X_train, CNN_2D_y_train, CNN_2D_X_test, CNN_2D_y_test = get_CNN_2D_data_set(train_data_file, test_data_file, window_size=13)
      
     print("Amino to Structure shapes:")
