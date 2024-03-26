@@ -4,6 +4,9 @@ import preprocessing as pp
 from one_hot_encodings import secondary_structure_one_hot
 from scipy import stats as st
 
+import warnings
+warnings.filterwarnings("ignore")
+
 def get_feedforward_amino_to_structure_predictions(model, inputs):
     inputs = torch.Tensor(inputs)
     inputs = inputs.unsqueeze(0)

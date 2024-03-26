@@ -1,6 +1,9 @@
 import torch
 from torch import nn
 
+import warnings
+warnings.filterwarnings("ignore")
+
 torch.manual_seed(42)
 
 class FeedforwardAminoToStructure(nn.Module):
