@@ -186,6 +186,12 @@ if __name__ == "__main__":
     load_file_cnn_1d = "pretrained/cnn_1d.pt"
     
     load_model = True
+    evaluate_ensemble = True
+    evaluate_feedforward = True
+    evaluate_cnn_2d = True
+    evaluate_cnn_1d = True
+    plot_evaluations = True
+    
     
     # Feedfoward
     X_train_a_to_s, y_train_a_to_s, X_test_a_to_s, y_test_a_to_s, sequence_lengts_train, sequence_lengths_test = pp.get_feedforward_amino_to_structure_data_sets(train_data_file, test_data_file)
@@ -211,30 +217,44 @@ if __name__ == "__main__":
     
     feedforward_models = (amino_to_structure_model, structure_to_structure_model)
     one_hots, symbols = get_ensemble_predictions(feedforward_models, cnn_2d_model, cnn_1d_model, X_test_a_to_s, X_test_CNN_2d, sequence_lengths_test)
-       
-    print("Ensemble")
-    confusion_matrix = eval.get_confusion_matrix(one_hots, y_test_s_to_s)
-    [print(row) for row in confusion_matrix]
-    [print(f"Sensitivity: {sens}, Specificity {spec}") for (sens, spec) in eval.get_sensitivity_and_specificity_from_confusion_matrix(confusion_matrix)]
-    print()
     
-    # print("Feedforward model")
-    # feedforward_predicted_one_hots, feedforward_predicted_symbold, feedforward_confidences = get_classification_from_probabilities(feedforward_predicted_probabilities, model_type="ff")
-    # feedforward_confusion_matrix = eval.get_confusion_matrix(feedforward_predicted_one_hots, y_test_s_to_s)
-    # [print(row) for row in feedforward_confusion_matrix]
-    # [print(f"Sensitivity: {sens}, Specificity {spec}") for (sens, spec) in eval.get_sensitivity_and_specificity_from_confusion_matrix(feedforward_confusion_matrix)]
-    # print()
+    if evaluate_ensemble:
+        print("Ensemble")
+        confusion_matrix = eval.get_confusion_matrix(one_hots, y_test_s_to_s)
+        [print(row) for row in confusion_matrix]
+        [print(f"Sensitivity: {sens}, Specificity {spec}") for (sens, spec) in eval.get_sensitivity_and_specificity_from_confusion_matrix(confusion_matrix)]
+        print()
     
-    # print("2D CNN")
-    # cnn_predicted_one_hots, cnn_predicted_symbold, cnn_confidences = get_classification_from_probabilities(cnn_predicted_probabilities, model_type="cnn")
-    # cnn_confusion_matrix = eval.get_confusion_matrix(cnn_predicted_one_hots, y_test_s_to_s)
-    # [print(row) for row in cnn_confusion_matrix]
-    # [print(f"Sensitivity: {sens}, Specificity {spec}") for (sens, spec) in eval.get_sensitivity_and_specificity_from_confusion_matrix(cnn_confusion_matrix)]
-    # print()
+    if evaluate_feedforward:
+        print("Feedforward model")
+        feedforward_predicted_one_hots, feedforward_predicted_symbold, feedforward_confidences = get_classification_from_probabilities(feedforward_predicted_probabilities, model_type="ff")
+        feedforward_confusion_matrix = eval.get_confusion_matrix(feedforward_predicted_one_hots, y_test_s_to_s)
+        [print(row) for row in feedforward_confusion_matrix]
+        [print(f"Sensitivity: {sens}, Specificity {spec}") for (sens, spec) in eval.get_sensitivity_and_specificity_from_confusion_matrix(feedforward_confusion_matrix)]
+        print()
     
-    # print("1D CNN")
-    # cnn_1d_predicted_one_hots, cnn_1d_predicted_symbold, cnn_1d_confidences = get_classification_from_probabilities(cnn_1d_predicted_probabilities, model_type="cnn")
-    # cnn_1d_confusion_matrix = eval.get_confusion_matrix(cnn_1d_predicted_one_hots, y_test_s_to_s)
-    # [print(row) for row in cnn_1d_confusion_matrix]
-    # [print(f"Sensitivity: {sens}, Specificity {spec}") for (sens, spec) in eval.get_sensitivity_and_specificity_from_confusion_matrix(cnn_1d_confusion_matrix)]
+    if evaluate_cnn_2d:
+        print("2D CNN")
+        cnn_predicted_one_hots, cnn_predicted_symbold, cnn_confidences = get_classification_from_probabilities(cnn_predicted_probabilities, model_type="cnn")
+        cnn_confusion_matrix = eval.get_confusion_matrix(cnn_predicted_one_hots, y_test_s_to_s)
+        [print(row) for row in cnn_confusion_matrix]
+        [print(f"Sensitivity: {sens}, Specificity {spec}") for (sens, spec) in eval.get_sensitivity_and_specificity_from_confusion_matrix(cnn_confusion_matrix)]
+        print()
+    
+    if evaluate_cnn_1d:
+        print("1D CNN")
+        cnn_1d_predicted_one_hots, cnn_1d_predicted_symbold, cnn_1d_confidences = get_classification_from_probabilities(cnn_1d_predicted_probabilities, model_type="cnn")
+        cnn_1d_confusion_matrix = eval.get_confusion_matrix(cnn_1d_predicted_one_hots, y_test_s_to_s)
+        [print(row) for row in cnn_1d_confusion_matrix]
+        [print(f"Sensitivity: {sens}, Specificity {spec}") for (sens, spec) in eval.get_sensitivity_and_specificity_from_confusion_matrix(cnn_1d_confusion_matrix)]
+    
+    if evaluate_ensemble and evaluate_feedforward and evaluate_cnn_2d and evaluate_cnn_1d and plot_evaluations:  
+        ensemble_measurements = eval.get_sensitivity_and_specificity_from_confusion_matrix(confusion_matrix)
+        feedforward_measurements = eval.get_sensitivity_and_specificity_from_confusion_matrix(feedforward_confusion_matrix)
+        cnn_measurements = eval.get_sensitivity_and_specificity_from_confusion_matrix(cnn_confusion_matrix)
+        cnn_1d_measurements = eval.get_sensitivity_and_specificity_from_confusion_matrix(cnn_1d_confusion_matrix)
         
+        eval.plot_sensitivity_and_specificity_per_class(ensemble_measurements)
+        eval.plot_sensitivity_and_specificity_per_class(feedforward_measurements)
+        eval.plot_sensitivity_and_specificity_per_class(cnn_measurements)
+        eval.plot_sensitivity_and_specificity_per_class(cnn_1d_measurements)
