@@ -2,9 +2,36 @@
 
 ## Introduction
 
-Intro
+This software can be used to predict the secondary structure of a protein sequence based on the sequence of amino acids.
+It uses an ensamble of different neural network strategies to make these predictions.
+
+### Interacting with the software
+
+- The user inputs an amino acid sequence
+- The software returns a prediction of the secondary structure sequence.
+- The user may choose to compare the prediciton with the true secondary structure sequence, given that the user already have this sequence.
+- The user input the true secondary structure sequence
+- The software returns
+  - The number of "misses" in the prediction
+  - The location of these misses in the sequence, marked by "X"
+  - The true secondary structure sequence
+  - The predicted secondary structure sequence
 
 ## How to run
+
+There are two ways to run the software:
+
+- Running the executable file `main.exe`
+- Running the python file `main.py`
+
+**Note** that using the second option requires a python environment with all libraries in the `requirements.txt` file. The first option has no such prerequisites. The end of this document contains a list of project files with a short description of their purpose. It is possible to run some of these files on their own, and that will also require a fitting python environment. 
+
+### Extra
+
+It is also possible to run a version of the software which only uses a CNN to make predictions. Similar to the main version, the methods to run this are:
+
+- Running the executable file `test_2d_cnn_only.exe`
+- Running the python file `test_2d_cnn_only.py`
 
 ## Example input and target sequences
 
@@ -39,6 +66,8 @@ Here are some example inputs with corresponding target value for easy testing of
 
 ## Project files
 
+**main.exe** file is the main executable for this project. This is the easiest way to run the software
+
 **main.py** file controls the interaction between user and the prediction model. Run this for the main program functionality.
 
 **models.py** file contains the definition of the individual models used in the ensemble prediction.
@@ -57,4 +86,6 @@ Here are some example inputs with corresponding target value for easy testing of
 
 **inference.py** file contains code for making predictions with trained models. Run this to make predictions on the test set and evaluate the results.
 
-**test_2d_cnn_only.py** (should describe if i decide to include this)
+**test_2d_cnn_only.py** file is a version of main.py that makes predictions only with the 2D CNN.
+
+**test_2d_cnn_only.exe** file is the easiest way to run the CNN version of the software. 
