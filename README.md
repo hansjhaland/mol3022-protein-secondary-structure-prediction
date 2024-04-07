@@ -57,7 +57,7 @@ Here are some example inputs with corresponding target value for easy testing of
 ### Example 4
 
 - RDFTPPTVKILQSSCDGGGHFPPTIQLLCLVSGYTPGTINITWLEDGQVMDVDLSTASTTQEGELASTQSELTLSQKHWLSDRTYTCQVTYQGHTFEDSTKKCADSNPRGVSAYLSRPSPFDLFIRKSPTITCLVVDLAPSKGTVNLTWSRASGKPVNHSTRKEEKQRNGTLTVTSTLPVGTRDWIEGETYQCRVTHPHLPRALMRSTTKTSGPRAAPEVYAFATPEWPGSRDKRTLACLIQNFMPEDISVQWLHNEVQLPDARHSTTQPRKTKGSGFFVFSRLEVTRAEWEQKDEFICRAVHEAASPSQTVQRAVSVNPGK
-- ______eeeee____________eeeeeeeeeee_____eeeee________eee___ee_____eeeeeeeeeehhhhh_____eeeee________eee__________eeeee_____________eeeeeee____________eee_____________eeee__eeeeeeeee__hhhhhh___eeeee________eeeee__________eeeee__________eeeeeeeee_______eeeee________________ee_____ee_eeeeeeehhhhh_____eeeee_________eeee_______
+- \______eeeee____________eeeeeeeeeee_____eeeee________eee___ee_____eeeeeeeeeehhhhh_____eeeee________eee__________eeeee_____________eeeeeee____________eee_____________eeee__eeeeeeeee__hhhhhh___eeeee________eeeee__________eeeee__________eeeeeeeee_______eeeee________________ee_____ee_eeeeeeehhhhh_____eeeee_________eeee_______
 
 ### Example 5
 
@@ -66,26 +66,26 @@ Here are some example inputs with corresponding target value for easy testing of
 
 ## Project files
 
-**main.exe** file is the main executable for this project. This is the easiest way to run the software
+``main.exe`` file is the main executable for this project. This is the easiest way to run the software
 
-**main.py** file controls the interaction between user and the prediction model. Run this for the main program functionality.
+``main.py`` file controls the interaction between user and the prediction model. Run this for the main program functionality.
 
-**models.py** file contains the definition of the individual models used in the ensemble prediction.
+``models.py`` file contains the definition of the individual models used in the ensemble prediction.
 
-**data** folder contains training and test data. [This](https://archive.ics.uci.edu/dataset/68/molecular+biology+protein+secondary+structure) is a link to the data source.
+``data`` folder contains training and test data. [This](https://archive.ics.uci.edu/dataset/68/molecular+biology+protein+secondary+structure) is a link to the data source.
 
-**pretrained** folder contains pretrained models that can be loaded and used without training.
+``pretrained`` folder contains pretrained models that can be loaded and used without training.
 
-**one_hot_encodings.py** file contains mappings from amino acid symbols and secondary structure symbols to corresponding one-hot encodings.
+``one_hot_encodings.py`` file contains mappings from amino acid symbols and secondary structure symbols to corresponding one-hot encodings.
 
-**preprocessing.py** file contains code for parsing data files and preparing the input to the different models.
+``preprocessing.py`` file contains code for parsing data files and preparing the input to the different models.
 
-**training.py** file contains code for training the different models. Run this to try out the training.
+``training.py`` file contains code for training the different models. Run this to try out the training.
 
-**evaluation.py** file contains functions for evaluating the performance of models. The main metrics are *specifisity* and *sensitivitiy*.
+``evaluation.py`` file contains functions for evaluating the performance of models. The main metrics are *specifisity* and *sensitivitiy*.
 
-**inference.py** file contains code for making predictions with trained models. Run this to make predictions on the test set and evaluate the results.
+``inference.py`` file contains code for making predictions with trained models. Run this to make predictions on the test set and evaluate the results.
 
-**test_2d_cnn_only.py** file is a version of main.py that makes predictions only with the 2D CNN.
+``test_2d_cnn_only.py`` file is a version of main.py that makes predictions only with the 2D CNN.
 
-**test_2d_cnn_only.exe** file is the easiest way to run the CNN version of the software. 
+``test_2d_cnn_only.exe`` file is the easiest way to run the CNN version of the software. 
