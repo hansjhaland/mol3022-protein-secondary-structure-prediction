@@ -68,6 +68,10 @@ def get_concat_sequence_windows(sequence: list[list[int]], window_size: int, one
 
 
 def get_sequential_sequence_windows(sequence: list[list[int]], window_size: int, one_hot_encoding: dict[str, list[int]]):
+    """
+    Return all windows with the given window size for a given sequence, organized in a 2D array.
+    """
+    
     # NOTE: Only works properly when window_size is an ODD number.
     # For even window size, additional windows are added.
     windows = []
@@ -162,6 +166,9 @@ def get_feedforward_structure_to_structure_data_sets(train_data_file: str, test_
 
 
 def get_sequential_data_set(train_data_file: str, test_data_file: str, window_size = 13) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Returns train and test datasets, containing containing two-dimensional windows
+    """
     train_AA_SS_seq_pairs = load_sequences_from_file(train_data_file)
     test_AA_SS_seq_pairs = load_sequences_from_file(test_data_file)
 
@@ -193,6 +200,10 @@ def get_sequential_data_set(train_data_file: str, test_data_file: str, window_si
     
     
 def get_CNN_2D_data_set(train_data_file: str, test_data_file: str, window_size = 13) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Transform the two-dimensional windows in the sequential data set to their transpose.
+    This seemed like a fitting representation for the 2D CNN model.
+    """
     X_train, y_train, X_test, y_test = get_sequential_data_set(train_data_file, test_data_file, window_size)
     
     X_train = [np.transpose(window) for window in X_train]
