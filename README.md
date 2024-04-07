@@ -7,9 +7,9 @@ It uses an ensamble of different neural network strategies to make these predict
 
 ### Interacting with the software
 
-- The user inputs an amino acid sequence
+- The user inputs an amino acid sequence.
 - The software returns a prediction of the secondary structure sequence.
-- The user may choose to compare the prediciton with the true secondary structure sequence, given that the user already have this sequence.
+- The user may choose to compare the prediction with the true secondary structure sequence, given that the user already have this sequence.
 - The user input the true secondary structure sequence
 - The software returns
   - The number of "misses" in the prediction
@@ -24,7 +24,7 @@ There are two ways to run the software:
 - Running the executable file `main.exe`
 - Running the python file `main.py`
 
-**Note** that using the second option requires a python environment with all libraries in the `requirements.txt` file. The first option has no such prerequisites. The end of this document contains a list of project files with a short description of their purpose. It is possible to run some of these files on their own, and that will also require a fitting python environment. 
+**Note** that using the second option requires a python environment with all libraries in the `requirements.txt` file. The first option has no such prerequisites, and is the recommended method. The end of this document contains a list of all project files with a short description of their individual purpose. It is possible to run some of these files on their own, and that will also require a fitting python environment.
 
 ### Extra
 
@@ -72,7 +72,7 @@ Here are some example inputs with corresponding target value for easy testing of
 
 **models.py** file contains the definition of the individual models used in the ensemble prediction.
 
-**data** (include url to data source) folder contains training and test data.
+**data** folder contains training and test data. [This](https://archive.ics.uci.edu/dataset/68/molecular+biology+protein+secondary+structure) is a link to the data source.
 
 **pretrained** folder contains pretrained models that can be loaded and used without training.
 
