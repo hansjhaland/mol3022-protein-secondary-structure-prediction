@@ -67,7 +67,7 @@ def get_concat_sequence_windows(sequence: list[list[int]], window_size: int, one
     return windows
 
 
-def get_sequential_sequence_windows(sequence, window_size, one_hot_encoding):
+def get_sequential_sequence_windows(sequence: list[list[int]], window_size: int, one_hot_encoding: dict[str, list[int]]):
     # NOTE: Only works properly when window_size is an ODD number.
     # For even window size, additional windows are added.
     windows = []
@@ -161,7 +161,7 @@ def get_feedforward_structure_to_structure_data_sets(train_data_file: str, test_
     return np.asarray(X_train), np.asarray(y_train), np.asarray(X_test), np.asarray(y_test)
 
 
-def get_sequential_data_set(train_data_file: str, test_data_file: str, window_size = 13):
+def get_sequential_data_set(train_data_file: str, test_data_file: str, window_size = 13) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     train_AA_SS_seq_pairs = load_sequences_from_file(train_data_file)
     test_AA_SS_seq_pairs = load_sequences_from_file(test_data_file)
 
@@ -192,7 +192,7 @@ def get_sequential_data_set(train_data_file: str, test_data_file: str, window_si
     return np.asarray(X_train), np.asarray(y_train), np.asarray(X_test), np.asarray(y_test)
     
     
-def get_CNN_2D_data_set(train_data_file: str, test_data_file: str, window_size = 13):
+def get_CNN_2D_data_set(train_data_file: str, test_data_file: str, window_size = 13) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     X_train, y_train, X_test, y_test = get_sequential_data_set(train_data_file, test_data_file, window_size)
     
     X_train = [np.transpose(window) for window in X_train]
@@ -229,3 +229,10 @@ if __name__ == "__main__":
         test_file_sequence_pairs = load_sequences_from_file(test_data_file)
 
         [print("Input:", pair[0], "\n", "Target:", pair[1], "\n") for pair in test_file_sequence_pairs[:10]]
+        
+    count_sequences = True
+    if count_sequences:
+        train_file_pairs = load_sequences_from_file(train_data_file)
+        test_file_pairs = load_sequences_from_file(test_data_file)
+        
+        print(f"{len(train_file_pairs)} sequences in training set. {len(test_file_pairs)} sequences in test set.")
