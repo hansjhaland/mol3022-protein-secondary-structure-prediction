@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This software can be used to predict the secondary structure of a protein sequence based on the sequence of amino acids.
+This is a sommand line software that can be used to predict the secondary structure of a protein sequence based on the sequence of amino acids.
 It uses an ensamble of different neural network strategies to make these predictions.
 
 ### Interacting with the software
@@ -21,7 +21,7 @@ It uses an ensamble of different neural network strategies to make these predict
 
 There are two ways to run the software:
 
-- Running the executable file `main.exe`
+- Running the executable file `main.exe` (wait around 10-20 sec for program to start)
 - Running the python file `main.py`
 
 **Note** that using the second option requires a python environment with all libraries in the `requirements.txt` file. The first option has no such prerequisites, and is the recommended method. The end of this document contains a list of all project files with a short description of their individual purpose. It is possible to run some of these files on their own, and that will also require a fitting python environment.
@@ -30,7 +30,7 @@ There are two ways to run the software:
 
 It is also possible to run a version of the software which only uses a CNN to make predictions. Similar to the main version, the methods to run this are:
 
-- Running the executable file `test_2d_cnn_only.exe`
+- Running the executable file `test_2d_cnn_only.exe` (wait around 10-20 sec for program to start)
 - Running the python file `test_2d_cnn_only.py`
 
 ## Example input and target sequences
@@ -88,4 +88,4 @@ Here are some example inputs with corresponding target value for easy testing of
 
 ``test_2d_cnn_only.py`` file is a version of main.py that makes predictions only with the 2D CNN.
 
-``test_2d_cnn_only.exe`` file is the easiest way to run the CNN version of the software. 
+``test_2d_cnn_only.exe`` file is the easiest way to run the CNN version of the software.
