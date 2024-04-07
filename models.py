@@ -92,7 +92,6 @@ class CNN2D(nn.Module):
         x = self.relu(self.hidden1(x))
         x = self.output(x)
         x = self.softmax(x)
-        # print(x)
         return x
     
     
@@ -101,11 +100,9 @@ class CNN1D(nn.Module):
         super().__init__()
 
         self.conv1d = nn.Conv1d(1, 1, 7, padding="same")
-        # self.conv1d2 = nn.Conv1d(16, 1, 13, padding="same")
         self.avg_pool = nn.AvgPool1d(5,5)
     
         self.hidden1 = nn.Linear(52, 32)
-        # self.hidden2 = nn.Linear(32, 32)
         self.output = nn.Linear(32, num_classes)
         
         self.relu = nn.ReLU()
@@ -115,11 +112,8 @@ class CNN1D(nn.Module):
     def forward(self, x):
         x = self.relu(self.conv1d(x))
         x = self.avg_pool(x)
-        # x = self.relu(self.conv1d2(x))
-        # x = self.avg_pool(x)
         x = torch.flatten(x, start_dim=1)
         x = self.relu(self.hidden1(x))
-        # x = self.relu(self.hidden2(x))
         x = self.output(x)
         x = self.softmax(x)
         return x
