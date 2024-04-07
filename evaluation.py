@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 import preprocessing as pp
 
 def get_confusion_matrix(predicted_one_hots, target_one_hots) -> list[list[int]]:
+    """
+    Returns a 3x3 confusion matrix where the rows represent the true class and the columns represent the predicted class.
+    """
+    
     confusion_matrix = [[0,0,0],[0,0,0],[0,0,0]]
     for prediction, target in zip(predicted_one_hots, target_one_hots):
         target_index = np.argmax(target)
@@ -12,6 +16,10 @@ def get_confusion_matrix(predicted_one_hots, target_one_hots) -> list[list[int]]
 
 
 def get_sensitivity_and_specificity_from_confusion_matrix(confusion_matrix) -> tuple[tuple[float],tuple[float],tuple[float]]:
+    """
+    Calculates the sensitivity and specificity for each class from the confusion matrix.
+    """
+    
     # NOTE: Sensitivity => Recall
     # NOTE: Specificity => Precision
     
@@ -27,6 +35,9 @@ def get_sensitivity_and_specificity_from_confusion_matrix(confusion_matrix) -> t
     
 
 def plot_secondary_structure_distribution_in_training_set():
+    """
+    Plots the distribution of secondary structure classes in the training set.
+    """
     training_set = "data/protein-secondary-structure.train"
     sequence_pairs = pp.load_sequences_from_file(training_set)
     secondary_structures = [pair[1] for pair in sequence_pairs]
@@ -55,6 +66,9 @@ def plot_secondary_structure_distribution_in_training_set():
 
 
 def plot_sensitivity_and_specificity_per_class(model_measures: list[tuple[float]]):
+    """
+    Plots the sensitivity and specificity for each class for a given model.
+    """
     labels = ['Helix', 'Sheet', 'Coil']
     sensitivity = [x[0] for x in model_measures]
     specificity = [x[1] for x in model_measures]
