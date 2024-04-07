@@ -10,9 +10,10 @@ def get_confusion_matrix(predicted_one_hots, target_one_hots) -> list[list[int]]
         confusion_matrix[target_index][prediction_index] += 1
     return confusion_matrix
 
+
 def get_sensitivity_and_specificity_from_confusion_matrix(confusion_matrix) -> tuple[tuple[float],tuple[float],tuple[float]]:
-    # NOTE: Sensitivity <=> Recall
-    # NOTE: Specificity <=> Precision
+    # NOTE: Sensitivity => Recall
+    # NOTE: Specificity => Precision
     
     sensitivity_helix = confusion_matrix[0][0] / (confusion_matrix[0][0] + confusion_matrix[0][1] + confusion_matrix[0][2])
     sensitivity_sheet = confusion_matrix[1][1] / (confusion_matrix[1][0] + confusion_matrix[1][1] + confusion_matrix[1][2])
@@ -48,6 +49,8 @@ def plot_secondary_structure_distribution_in_training_set():
     counts = [num_alpha_helix, num_beta_sheet, num_random_coil]
     
     plt.bar(labels, counts)
+    plt.yticks(fontsize=16)
+    plt.xticks(fontsize=16)
     plt.show()
 
 
@@ -59,17 +62,15 @@ def plot_sensitivity_and_specificity_per_class(model_measures: list[tuple[float]
     x = np.arange(len(labels))
     width = 0.35
     
-    fig, ax = plt.subplots()
-    rects1 = ax.bar(x - width/2, sensitivity, width, label='Sensitivity')
-    rects2 = ax.bar(x + width/2, specificity, width, label='Specificity')
-    
-    ax.set_ylabel('Scores')
-    # ax.set_title('Sensitivity and Specificity per class')
+    _, ax = plt.subplots()
+    ax.bar(x - width/2, sensitivity, width, label='Sensitivity')
+    ax.bar(x + width/2, specificity, width, label='Specificity')
+    ax.set_yticklabels(np.round(np.arange(0.0,1.2,0.2), decimals=1), fontsize=20)
     ax.set_xticks(x)
-    ax.set_xticklabels(labels)
-    ax.legend()
+    ax.set_xticklabels(labels, fontsize=20)
+    ax.legend(fontsize=14)
     
-    plt.ylim(0, 1.2)
+    plt.ylim(0, 1.3)
     plt.show()
     
     
