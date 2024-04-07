@@ -8,6 +8,10 @@ import warnings
 warnings.filterwarnings("ignore")
 
 def get_feedforward_amino_to_structure_predictions(model, inputs):
+    """
+    Returns predictions from the amino-to-structure feedforward model.
+    These are used to generate the input for the structure-to-structure feedforward model.
+    """
     inputs = torch.Tensor(inputs)
     inputs = inputs.unsqueeze(0)
 
@@ -21,6 +25,9 @@ def get_feedforward_amino_to_structure_predictions(model, inputs):
 
 
 def get_feedforward_structure_to_structure_predictions(model, inputs):
+    """
+    Returns predictions from the structure-to-structure feedforward model.
+    """
     inputs = torch.Tensor(inputs)
     inputs = inputs.unsqueeze(0)
     
@@ -34,6 +41,9 @@ def get_feedforward_structure_to_structure_predictions(model, inputs):
 
 
 def get_next_full_amino_sequence(amino_windows, amino_sequence_length):
+    """
+    Returns all windows that are part of the next amino acid sequence.
+    """
     amino_sequence = []
     for i in range(amino_sequence_length):
         amino_sequence.append(amino_windows[i])
@@ -42,6 +52,9 @@ def get_next_full_amino_sequence(amino_windows, amino_sequence_length):
 
 
 def get_structure_to_structure_input_from_amino_to_structure_output(amino_to_structure_model, secondary_structure_one_hot, amino_windows, amino_sequence_lengths, window_size=13, window_type="concatenate"):
+    """
+    Returns the inputs for the structure-to-structure feedforward model based on the outputs of the amino-to-structure feedforward model.
+    """
     structure_windows = []
     for sequence_length in amino_sequence_lengths:
         amino_sequence, amino_windows = get_next_full_amino_sequence(amino_windows, sequence_length)
@@ -54,12 +67,18 @@ def get_structure_to_structure_input_from_amino_to_structure_output(amino_to_str
             
 
 def get_full_feedforward_predictions(amino_to_structure_model, structure_to_structure_model, amino_windows, amino_sequence_lengths, window_type="concatenate") -> list[list[float]]:
+    """
+    Returns the final predictions from the two-stage feedforward model.
+    """
     structure_to_structure_inputs = get_structure_to_structure_input_from_amino_to_structure_output(amino_to_structure_model, secondary_structure_one_hot, amino_windows, amino_sequence_lengths, window_size=13, window_type=window_type)
     feedforward_predictions = get_feedforward_structure_to_structure_predictions(structure_to_structure_model, structure_to_structure_inputs)
     return feedforward_predictions
     
     
 def get_cnn_2d_predictions(cnn_2d_model, inputs):
+    """
+    Returns predictions from the 2D CNN model.
+    """
     inputs = torch.Tensor(inputs)
     inputs = inputs.unsqueeze(1)
     
@@ -73,6 +92,9 @@ def get_cnn_2d_predictions(cnn_2d_model, inputs):
 
 
 def get_cnn_1d_predictions(cnn_1d_model, inputs):
+    """
+    Returns predictions from the 1D CNN model.
+    """
     inputs = torch.Tensor(inputs)
     inputs = inputs.unsqueeze(1)
     
@@ -86,6 +108,9 @@ def get_cnn_1d_predictions(cnn_1d_model, inputs):
     
     
 def get_classification_from_probabilities(probabilities: np.ndarray[np.ndarray[float]], model_type="ff") -> tuple[list[list[int]], list[str], list[float]]:
+    """
+    Converts the output probabilities from a model to the correct one-hot encoding and symbol classifications.
+    """
     if model_type == "cnn":
         classification_index = np.argmax(probabilities, axis=2).squeeze()
         confidences = np.max(probabilities, axis=2).squeeze()
@@ -106,6 +131,9 @@ def get_classification_from_probabilities(probabilities: np.ndarray[np.ndarray[f
     
     
 def get_ensemble_predictions(feedforward_models, cnn_2d_model, cnn_1d_model, inputs_1d, inputs_2d, sequence_lengths, verbose=False):
+    """
+    Returns the predictions from an ensemble of models.
+    """
     feedforward_predictions = get_full_feedforward_predictions(feedforward_models[0], feedforward_models[1], inputs_1d, sequence_lengths)
     cnn_2d_predictions = get_cnn_2d_predictions(cnn_2d_model, inputs_2d)
     cnn_1d_predictions = get_cnn_1d_predictions(cnn_1d_model, inputs_1d)
@@ -117,20 +145,6 @@ def get_ensemble_predictions(feedforward_models, cnn_2d_model, cnn_1d_model, inp
     cnn_1d_one_hot_classifications, cnn_1d_symbol_classifications, cnn_1d_confidences = \
         get_classification_from_probabilities(cnn_1d_predictions, model_type="cnn")
         
-    # print(type(feedforward_one_hot_classifications), type(feedforward_symbol_classifications), type(feedforward_confidences))
-    # print(type(cnn_2d_one_hot_classifications), type(cnn_2d_symbol_classifications), type(cnn_2d_confidences))
-    # print(type(cnn_1d_one_hot_classifications), type(cnn_1d_symbol_classifications), type(cnn_1d_confidences))
-        
-    # feedforward_one_hot_classifications, feedforward_symbol_classifications = np.asarray(feedforward_one_hot_classifications), np.asarray(feedforward_symbol_classifications)
-    # cnn_2d_one_hot_classifications, cnn_2d_symbol_classifications = np.asarray(cnn_2d_one_hot_classifications), np.asarray(cnn_2d_symbol_classifications)
-    # cnn_1d_one_hot_classifications, cnn_1d_symbol_classifications = np.asarray(cnn_1d_one_hot_classifications), np.asarray(cnn_1d_symbol_classifications)
-
-    # h = 0
-    # e = 1
-    # c = 2
-
-    # print(st.mode([e,e,h],[e,e,h],[e,e,h]).mode, st.mode([e,e,h]).count)
-    # print(st.mode([e, h, c]))
     index_to_secondary_strucure = {"0": "h", "1": "e", "2": "_"}
     ensemble_symbols = []
     ensemble_one_hots = []
@@ -163,11 +177,10 @@ def get_ensemble_predictions(feedforward_models, cnn_2d_model, cnn_1d_model, inp
     return ensemble_one_hots, ensemble_symbols 
 
 
-def print_predicted_sequence():
-    pass    
-
-
 def load_trained_model(load_file_path):
+    """
+    Loads a pre-trained model from a file.
+    """
     model = torch.load(load_file_path)
     model.eval()
     return model
