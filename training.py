@@ -6,6 +6,9 @@ import torch
 import torch.utils.data as data
 
 def train_feedforward_amino_to_structure_model(inputs, targets, learning_rate=0.001, num_epochs=100) -> FeedforwardAminoToStructure:
+    """
+    Trains a feedforward neural network model that maps amino acid sequences to secondary structure sequences.
+    """
     inputs = torch.Tensor(inputs)
     targets = torch.Tensor(targets)
     
@@ -31,6 +34,9 @@ def train_feedforward_amino_to_structure_model(inputs, targets, learning_rate=0.
    
     
 def train_feedforward_structure_to_structure_model(inputs, targets, learning_rate=0.001, num_epochs=100) -> FeedforwardStructureToStructure:
+    """
+    Trains a feedforward neural network model that maps secondary structure sequences to secondary structure sequences.
+    """
     inputs = torch.Tensor(inputs)
     targets = torch.Tensor(targets)
     
@@ -56,6 +62,9 @@ def train_feedforward_structure_to_structure_model(inputs, targets, learning_rat
 
 
 def train_cnn2d_model(inputs, targets, learning_rate=0.001, num_epochs=100):
+    """
+    Trains a 2D convolutional neural network model that maps amino acid sequences to secondary structure sequences.
+    """
     inputs = torch.Tensor(inputs).unsqueeze(1)
     targets = torch.Tensor(targets)
     num_classes = targets.shape[1]
@@ -80,6 +89,9 @@ def train_cnn2d_model(inputs, targets, learning_rate=0.001, num_epochs=100):
 
 
 def train_cnn1d_model(inputs, targets, learning_rate=0.001, num_epochs=100):
+    """
+    Trains a 1D convolutional neural network model that maps amino acid sequences to secondary structure sequences.
+    """
     inputs = torch.Tensor(inputs).unsqueeze(1)
     targets = torch.Tensor(targets)
     num_classes = targets.shape[1]
@@ -104,6 +116,9 @@ def train_cnn1d_model(inputs, targets, learning_rate=0.001, num_epochs=100):
 
 
 def save_trained_model(model, save_file_path):
+    """
+    Save trained model to given file.
+    """
     torch.save(model, save_file_path)
 
 
